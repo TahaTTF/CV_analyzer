@@ -1,0 +1,470 @@
+openapi: 3.0.3
+info:
+  title: AI CV Analyzer API
+  version: 0.1.0-proposed
+  description: |
+    Proposed V1 browser-to-backend contract. It requires agreement by both
+    developers before implementation. Examples are illustrative, not evidence
+    that endpoints exist. Server-Sent Events (SSE) are proposed for progress
+    because V1 communication is primarily server-to-client.
+servers:
+  - url: http://localhost:8080
+    description: Planned local Spring Boot API
+tags:
+  - name: CVs
+  - name: Jobs
+  - name: Recommendations
+  - name: Analysis
+paths:
+  /api/cvs/upload:
+    post:
+      tags: [CVs]
+      summary: Upload a PDF CV and start analysis
+      operationId: uploadCv
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: PDF only; the final size limit will be configured by the backend.
+            encoding:
+              file:
+                contentType: application/pdf
+      responses:
+        '202':
+          description: Accepted for asynchronous analysis.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CvUploadAccepted'
+              example:
+                cvId: cv_01HXYZ
+                analysisId: analysis_01HXYZ
+                status: PENDING
+                eventsUrl: /api/analysis/analysis_01HXYZ/events
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '413':
+          description: PDF exceeds the configured limit.
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/ErrorResponse'}
+        '415':
+          description: File is not an accepted PDF.
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/ErrorResponse'}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /api/cvs/{cvId}:
+    parameters:
+      - $ref: '#/components/parameters/CvId'
+    get:
+      tags: [CVs]
+      summary: Get CV metadata and its extracted profile
+      operationId: getCv
+      responses:
+        '200':
+          description: CV and available profile.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/CvDetails'}
+              example:
+                id: cv_01HXYZ
+                fileName: candidate-cv.pdf
+                status: COMPLETED
+                uploadedAt: '2026-10-20T09:15:00Z'
+                profile:
+                  headline: Backend developer
+                  skills: [Java, Spring Boot, MongoDB]
+                  experienceYears: 3.5
+                  education: ['MSc Computer Science']
+                  languages: [{code: fr, level: C1}]
+        '404': {$ref: '#/components/responses/NotFound'}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /api/jobs:
+    get:
+      tags: [Jobs]
+      summary: List normalized jobs
+      operationId: listJobs
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - name: query
+          in: query
+          schema: {type: string, maxLength: 200}
+        - name: location
+          in: query
+          schema: {type: string, maxLength: 120}
+        - name: source
+          in: query
+          schema: {$ref: '#/components/schemas/JobSource'}
+      responses:
+        '200':
+          description: A page of active jobs.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/JobPage'}
+              example:
+                items:
+                  - id: job_01
+                    title: Java Developer
+                    company: Example SAS
+                    location: Paris, France
+                    remote: true
+                    source: ARBEITNOW
+                    skills: [Java, Spring Boot]
+                    url: https://example.test/jobs/123
+                page: 0
+                size: 20
+                totalElements: 1
+                totalPages: 1
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /api/jobs/{jobId}:
+    parameters:
+      - $ref: '#/components/parameters/JobId'
+    get:
+      tags: [Jobs]
+      summary: Get one normalized job
+      operationId: getJob
+      responses:
+        '200':
+          description: Job details.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/JobDetails'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /api/recommendations:
+    post:
+      tags: [Recommendations]
+      summary: Request or refresh recommendations for an analyzed CV
+      operationId: createRecommendations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RecommendationRequest'}
+            example:
+              cvId: cv_01HXYZ
+              limit: 10
+              filters:
+                countryCode: FR
+                remoteOnly: false
+      responses:
+        '200':
+          description: Recommendations were available synchronously.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecommendationResponse'}
+        '202':
+          description: Recommendation work was accepted asynchronously.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecommendationAccepted'}
+              example:
+                cvId: cv_01HXYZ
+                analysisId: analysis_01HREC
+                status: PENDING
+                eventsUrl: /api/analysis/analysis_01HREC/events
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409':
+          description: CV analysis is not ready for matching.
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/ErrorResponse'}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /api/recommendations/{cvId}:
+    parameters:
+      - $ref: '#/components/parameters/CvId'
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/Size'
+    get:
+      tags: [Recommendations]
+      summary: Get the latest recommendations for a CV
+      operationId: getRecommendations
+      responses:
+        '200':
+          description: Ranked recommendation page.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RecommendationResponse'}
+              example:
+                cvId: cv_01HXYZ
+                generatedAt: '2026-10-20T09:16:30Z'
+                items:
+                  - rank: 1
+                    score: 0.87
+                    semanticScore: 0.82
+                    requirementsScore: 0.92
+                    matchedSkills: [Java, Spring Boot]
+                    missingSkills: [Kubernetes]
+                    job:
+                      id: job_01
+                      title: Java Developer
+                      company: Example SAS
+                      location: Paris, France
+                      remote: true
+                      source: ARBEITNOW
+                      skills: [Java, Spring Boot, Kubernetes]
+                      url: https://example.test/jobs/123
+                page: 0
+                size: 20
+                totalElements: 1
+                totalPages: 1
+        '404': {$ref: '#/components/responses/NotFound'}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /api/analysis/{analysisId}/events:
+    parameters:
+      - $ref: '#/components/parameters/AnalysisId'
+    get:
+      tags: [Analysis]
+      summary: Stream analysis progress using Server-Sent Events
+      description: |
+        Proposed V1 SSE stream. Clients should reconnect using the browser's
+        EventSource behavior and fetch the latest CV/recommendation resource
+        after a terminal event. The server may emit heartbeat comments.
+      operationId: streamAnalysisEvents
+      responses:
+        '200':
+          description: |
+            SSE stream. Events use `event: progress` and JSON in `data`; a final
+            update carries COMPLETED or FAILED before the server closes.
+          content:
+            text/event-stream:
+              schema:
+                type: string
+              example: |-
+                id: 7
+                event: progress
+                data: {"analysisId":"analysis_01HXYZ","status":"PROCESSING","stage":"EXTRACTING_PROFILE","progressPercent":45,"message":"Extracting profile","occurredAt":"2026-10-20T09:15:10Z"}
+
+        '404': {$ref: '#/components/responses/NotFound'}
+        '500': {$ref: '#/components/responses/InternalError'}
+components:
+  parameters:
+    CvId:
+      name: cvId
+      in: path
+      required: true
+      schema: {type: string, minLength: 1}
+    JobId:
+      name: jobId
+      in: path
+      required: true
+      schema: {type: string, minLength: 1}
+    AnalysisId:
+      name: analysisId
+      in: path
+      required: true
+      schema: {type: string, minLength: 1}
+    Page:
+      name: page
+      in: query
+      description: Zero-based page index.
+      schema: {type: integer, minimum: 0, default: 0}
+    Size:
+      name: size
+      in: query
+      schema: {type: integer, minimum: 1, maximum: 100, default: 20}
+  responses:
+    BadRequest:
+      description: Request validation failed.
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/ErrorResponse'}
+          example:
+            timestamp: '2026-10-20T09:15:00Z'
+            status: 400
+            code: VALIDATION_ERROR
+            message: Request validation failed
+            path: /api/jobs
+            fieldErrors: [{field: size, message: must be at most 100}]
+            traceId: 9f02d3b4
+    NotFound:
+      description: Requested resource does not exist or is not visible to the caller.
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/ErrorResponse'}
+    InternalError:
+      description: Unexpected server error; details are not exposed.
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/ErrorResponse'}
+  schemas:
+    AnalysisStatus:
+      type: string
+      enum: [PENDING, PROCESSING, COMPLETED, FAILED]
+    JobSource:
+      type: string
+      enum: [ARBEITNOW, FRANCE_TRAVAIL, ADZUNA]
+    CvUploadAccepted:
+      type: object
+      required: [cvId, analysisId, status, eventsUrl]
+      properties:
+        cvId: {type: string}
+        analysisId: {type: string}
+        status: {$ref: '#/components/schemas/AnalysisStatus'}
+        eventsUrl: {type: string, format: uri-reference}
+    RecommendationAccepted:
+      allOf:
+        - $ref: '#/components/schemas/CvUploadAccepted'
+    CvDetails:
+      type: object
+      required: [id, fileName, status, uploadedAt]
+      properties:
+        id: {type: string}
+        fileName: {type: string}
+        status: {$ref: '#/components/schemas/AnalysisStatus'}
+        uploadedAt: {type: string, format: date-time}
+        profile:
+          nullable: true
+          allOf: [{$ref: '#/components/schemas/CandidateProfile'}]
+    CandidateProfile:
+      type: object
+      properties:
+        headline: {type: string}
+        skills:
+          type: array
+          items: {type: string}
+        experienceYears: {type: number, format: double, minimum: 0}
+        education:
+          type: array
+          items: {type: string}
+        languages:
+          type: array
+          items: {$ref: '#/components/schemas/Language'}
+    Language:
+      type: object
+      required: [code]
+      properties:
+        code: {type: string, minLength: 2, maxLength: 3}
+        level: {type: string, example: B2}
+    JobSummary:
+      type: object
+      required: [id, title, company, source, url]
+      properties:
+        id: {type: string}
+        title: {type: string}
+        company: {type: string}
+        location: {type: string, nullable: true}
+        remote: {type: boolean}
+        source: {$ref: '#/components/schemas/JobSource'}
+        skills:
+          type: array
+          items: {type: string}
+        url: {type: string, format: uri}
+    JobDetails:
+      allOf:
+        - $ref: '#/components/schemas/JobSummary'
+        - type: object
+          properties:
+            description: {type: string}
+            requirements:
+              type: object
+              properties:
+                skills:
+                  type: array
+                  items: {type: string}
+                languages:
+                  type: array
+                  items: {$ref: '#/components/schemas/Language'}
+                minExperienceYears: {type: number, minimum: 0}
+            publishedAt: {type: string, format: date-time, nullable: true}
+    PageMetadata:
+      type: object
+      required: [page, size, totalElements, totalPages]
+      properties:
+        page: {type: integer, minimum: 0}
+        size: {type: integer, minimum: 1}
+        totalElements: {type: integer, format: int64, minimum: 0}
+        totalPages: {type: integer, minimum: 0}
+    JobPage:
+      allOf:
+        - $ref: '#/components/schemas/PageMetadata'
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items: {$ref: '#/components/schemas/JobSummary'}
+    RecommendationRequest:
+      type: object
+      required: [cvId]
+      properties:
+        cvId: {type: string}
+        limit: {type: integer, minimum: 1, maximum: 100, default: 20}
+        filters:
+          type: object
+          properties:
+            countryCode: {type: string, minLength: 2, maxLength: 2}
+            remoteOnly: {type: boolean, default: false}
+    RecommendationItem:
+      type: object
+      required: [rank, score, job]
+      properties:
+        rank: {type: integer, minimum: 1}
+        score: {type: number, minimum: 0, maximum: 1}
+        semanticScore: {type: number, minimum: 0, maximum: 1}
+        requirementsScore: {type: number, minimum: 0, maximum: 1}
+        matchedSkills:
+          type: array
+          items: {type: string}
+        missingSkills:
+          type: array
+          items: {type: string}
+        job: {$ref: '#/components/schemas/JobSummary'}
+    RecommendationResponse:
+      allOf:
+        - $ref: '#/components/schemas/PageMetadata'
+        - type: object
+          required: [cvId, generatedAt, items]
+          properties:
+            cvId: {type: string}
+            generatedAt: {type: string, format: date-time}
+            items:
+              type: array
+              items: {$ref: '#/components/schemas/RecommendationItem'}
+    AnalysisProgressEvent:
+      type: object
+      required: [analysisId, status, stage, progressPercent, occurredAt]
+      properties:
+        analysisId: {type: string}
+        status: {$ref: '#/components/schemas/AnalysisStatus'}
+        stage: {type: string, example: EXTRACTING_PROFILE}
+        progressPercent: {type: integer, minimum: 0, maximum: 100}
+        message: {type: string}
+        occurredAt: {type: string, format: date-time}
+        error:
+          nullable: true
+          allOf: [{$ref: '#/components/schemas/ErrorDetail'}]
+    ErrorDetail:
+      type: object
+      properties:
+        code: {type: string}
+        message: {type: string}
+    FieldError:
+      type: object
+      required: [field, message]
+      properties:
+        field: {type: string}
+        message: {type: string}
+    ErrorResponse:
+      type: object
+      required: [timestamp, status, code, message, path]
+      properties:
+        timestamp: {type: string, format: date-time}
+        status: {type: integer, minimum: 400, maximum: 599}
+        code: {type: string, example: RESOURCE_NOT_FOUND}
+        message: {type: string}
+        path: {type: string}
+        fieldErrors:
+          type: array
+          items: {$ref: '#/components/schemas/FieldError'}
+        traceId: {type: string}
