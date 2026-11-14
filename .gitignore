@@ -37,9 +37,7 @@ htmlcov/
 
 # IDE / OS
 .idea/
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
+/.vscode/
 *.iml
 .DS_Store
 Thumbs.db
@@ -51,4 +49,12 @@ temp/
 uploads/
 data/
 coverage/
+parser-results/
+benchmark-results/
+*.benchmark.json
+
+# Local CV validation data, backups, and accidental nested workspace
+/cvs/
+/backups/
+/CV_analyzer/
 

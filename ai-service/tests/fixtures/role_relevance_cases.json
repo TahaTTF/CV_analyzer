@@ -1,0 +1,36 @@
+[
+  {
+    "case": "CV-04",
+    "targetRole": "Data Engineering and cloud data platforms",
+    "labels": "Provisional title-family labels; they are not human relevance ground truth.",
+    "jobs": [
+      {"title": "Data Engineer", "expected": "same_or_close"},
+      {"title": "Data Analist", "expected": "same_or_close"},
+      {"title": "Data Scientist - Forecasting", "expected": "related"},
+      {"title": "Doctorant développement d'une plateforme multi-capteurs", "expected": "explicit_mismatch"}
+    ]
+  },
+  {
+    "case": "CV-07",
+    "targetRole": "Data Engineering",
+    "labels": "Provisional title-family labels; they are not human relevance ground truth.",
+    "jobs": [
+      {"title": "Data Engineer", "expected": "same_or_close"},
+      {"title": "Consultant Business Intelligence and Data Science", "expected": "related"},
+      {"title": "Bioengineer, Display and Library Engineering", "expected": "explicit_mismatch"},
+      {"title": "Lab Automation Internship", "expected": "explicit_mismatch"},
+      {"title": "Business Operations Intern", "expected": "explicit_mismatch"}
+    ]
+  },
+  {
+    "case": "CV-09",
+    "targetRole": "Data Engineering | Cloud and DevOps | Distributed Systems",
+    "labels": "Provisional title-family labels; they are not human relevance ground truth.",
+    "jobs": [
+      {"title": "Data Engineer", "expected": "same_or_close"},
+      {"title": "System Administrator", "expected": "related"},
+      {"title": "Senior DevOps Engineer", "expected": "same_or_close"},
+      {"title": "Control Systems Engineer", "expected": "explicit_mismatch"}
+    ]
+  }
+]
