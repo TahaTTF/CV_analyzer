@@ -86,3 +86,18 @@ Indexes: `{source:1, startedAt:-1}`, `{status:1, startedAt:-1}`, and an optional
 - Recompute job and CV vectors together when changing embedding models; never compare incompatible vector spaces.
 - Encrypt transport and storage, minimize retained raw text, redact logs, and define deletion/retention behavior before real candidate data is used.
 
+## Implemented Milestone 1.5 job additions
+
+The current Spring document keeps the original normalized provider text plus source metadata:
+partner label/ID, provider categories, tags, and ROME codes. requirements now also supports
+toBeAcquiredSkills. itClassification stores isItRelevant, matchedCategories, relevanceReason,
+version, and classifiedAt. All fields are optional for backward compatibility with the 300
+existing Arbeitnow documents.
+
+Implemented indexes are:
+
+- unique source_external_id_unique on source + externalId;
+- status_fetched_at;
+- status_it_published_at for relevant-job browsing;
+- publishedAt.
+

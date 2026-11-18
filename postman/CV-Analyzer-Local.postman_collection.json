@@ -1,0 +1,165 @@
+{
+  "info": {
+    "_postman_id": "7171f99c-350b-4cb3-acaa-6cd01d543be4",
+    "name": "CV Analyzer Local",
+    "description": "Local health, guarded provider ingestion, classification, and job read checks. Write requests are skipped unless allowWrites is explicitly set to true.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080", "type": "string" },
+    { "key": "jobId", "value": "", "type": "string" },
+    { "key": "allowWrites", "value": "false", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/actuator/health",
+        "description": "Expected status: 200. Confirms the application and MongoDB health indicator are UP."
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "exec": [
+          "pm.test('status is 200', () => pm.response.to.have.status(200));",
+          "pm.test('application is UP', () => pm.expect(pm.response.json().status).to.eql('UP'));"
+        ], "type": "text/javascript" }
+      }]
+    },
+    {
+      "name": "Ingest Arbeitnow jobs",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": { "exec": [
+            "if (pm.collectionVariables.get('allowWrites') !== 'true') pm.execution.skipRequest();"
+          ], "type": "text/javascript" }
+        },
+        {
+          "listen": "test",
+          "script": { "exec": [
+            "pm.test('status is 200', () => pm.response.to.have.status(200));",
+            "const body = pm.response.json();",
+            "pm.test('ingestion summary has numeric counters', () => ['fetched','inserted','updated','skipped','failed'].forEach(k => pm.expect(body[k]).to.be.a('number')));"
+          ], "type": "text/javascript" }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/api/dev/ingestion/arbeitnow",
+        "description": "WRITE + EXTERNAL CALL. Skipped unless allowWrites=true. Backend also requires local profile and JOB_INGESTION_ENABLED=true."
+      }
+    },
+    {
+      "name": "Ingest Adzuna jobs",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": { "exec": [
+            "if (pm.collectionVariables.get('allowWrites') !== 'true') pm.execution.skipRequest();"
+          ], "type": "text/javascript" }
+        },
+        {
+          "listen": "test",
+          "script": { "exec": [
+            "pm.test('status is 200', () => pm.response.to.have.status(200));",
+            "const body = pm.response.json();",
+            "pm.test('ingestion summary has numeric counters', () => ['fetched','inserted','updated','skipped','failed'].forEach(k => pm.expect(body[k]).to.be.a('number')));"
+          ], "type": "text/javascript" }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/api/dev/ingestion/adzuna",
+        "description": "WRITE + LIMITED EXTERNAL CALL. Skipped unless allowWrites=true. Confirm the Adzuna request budget before running."
+      }
+    },
+    {
+      "name": "Ingest La bonne alternance jobs",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": { "exec": [
+            "if (pm.collectionVariables.get('allowWrites') !== 'true') pm.execution.skipRequest();"
+          ], "type": "text/javascript" }
+        },
+        {
+          "listen": "test",
+          "script": { "exec": [
+            "pm.test('status is 200', () => pm.response.to.have.status(200));",
+            "const body = pm.response.json();",
+            "pm.test('ingestion summary has numeric counters', () => ['fetched','inserted','updated','skipped','failed'].forEach(k => pm.expect(body[k]).to.be.a('number')));"
+          ], "type": "text/javascript" }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/api/dev/ingestion/la-bonne-alternance",
+        "description": "WRITE + EXTERNAL CALL. Skipped unless allowWrites=true. Uses the backend Bearer credential and configured ROME filter."
+      }
+    },
+    {
+      "name": "Classify existing jobs offline",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": { "exec": [
+            "if (pm.collectionVariables.get('allowWrites') !== 'true') pm.execution.skipRequest();"
+          ], "type": "text/javascript" }
+        },
+        {
+          "listen": "test",
+          "script": { "exec": [
+            "pm.test('status is 200', () => pm.response.to.have.status(200));",
+            "pm.test('classification summary is present', () => pm.expect(pm.response.json().classified).to.be.a('number'));"
+          ], "type": "text/javascript" }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/api/dev/ingestion/classify-existing",
+        "description": "LOCAL DATABASE WRITE, NO EXTERNAL CALL. Skipped unless allowWrites=true. Classifies only documents without classification metadata."
+      }
+    },
+    {
+      "name": "List jobs",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/jobs?page=0&size=20",
+        "description": "Expected status: 200. Saves the first returned job ID for the details request."
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "exec": [
+          "pm.test('status is 200', () => pm.response.to.have.status(200));",
+          "const body = pm.response.json();",
+          "pm.test('response follows page contract', () => { pm.expect(body.items).to.be.an('array'); pm.expect(body.page).to.eql(0); pm.expect(body.totalElements).to.be.a('number'); });",
+          "if (body.items.length > 0) pm.collectionVariables.set('jobId', body.items[0].id);"
+        ], "type": "text/javascript" }
+      }]
+    },
+    {
+      "name": "Get job details",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/jobs/{{jobId}}",
+        "description": "Expected status: 200 after List jobs has populated jobId."
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "exec": [
+          "pm.test('status is 200', () => pm.response.to.have.status(200));",
+          "const body = pm.response.json();",
+          "pm.test('details match requested job', () => { pm.expect(body.id).to.eql(pm.collectionVariables.get('jobId')); pm.expect(body.title).to.be.a('string'); pm.expect(body.source).to.be.a('string'); });"
+        ], "type": "text/javascript" }
+      }]
+    }
+  ]
+}

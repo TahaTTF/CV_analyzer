@@ -1,0 +1,57 @@
+spring:
+  application:
+    name: cv-analyzer-backend
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://cv_analyzer:change-me@localhost:27018/cv_analyzer?authSource=admin}
+      database: ${MONGODB_DATABASE:cv_analyzer}
+      auto-index-creation: true
+server:
+  port: ${BACKEND_PORT:8080}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+app:
+  ai-matching:
+    base-url: ${AI_SERVICE_URL:http://localhost:8000}
+    connect-timeout: ${AI_CONNECT_TIMEOUT:3s}
+    read-timeout: ${AI_READ_TIMEOUT:60s}
+  cv:
+    max-file-bytes: 5242880
+    max-extracted-characters: 500000
+    max-pdf-pages: 100
+  ingestion:
+    enabled: ${JOB_INGESTION_ENABLED:false}
+    arbeitnow:
+      base-url: ${ARBEITNOW_API_URL:https://www.arbeitnow.com/api/job-board-api}
+      max-pages: ${ARBEITNOW_MAX_PAGES:1}
+      request-budget: ${ARBEITNOW_REQUEST_BUDGET:1}
+      connect-timeout: 5s
+      read-timeout: 30s
+    adzuna:
+      base-url: ${ADZUNA_API_URL:https://api.adzuna.com/v1/api}
+      app-id: ${ADZUNA_APP_ID:}
+      app-key: ${ADZUNA_APP_KEY:}
+      country: ${ADZUNA_COUNTRY:fr}
+      query: ${ADZUNA_QUERY:}
+      results-per-page: ${ADZUNA_RESULTS_PER_PAGE:50}
+      max-pages: ${ADZUNA_MAX_PAGES:1}
+      request-budget: ${ADZUNA_REQUEST_BUDGET:1}
+      connect-timeout: 5s
+      read-timeout: 30s
+    la-bonne-alternance:
+      base-url: ${LA_BONNE_ALTERNANCE_API_URL:https://api.apprentissage.beta.gouv.fr/api}
+      api-key: ${LA_BONNE_ALTERNANCE_API_KEY:}
+      romes: ${LA_BONNE_ALTERNANCE_ROMES:M1801,M1802,M1803,M1804,M1805,M1806,M1807,M1808,M1809,M1810}
+      request-budget: ${LA_BONNE_ALTERNANCE_REQUEST_BUDGET:1}
+      connect-timeout: 5s
+      read-timeout: 30s

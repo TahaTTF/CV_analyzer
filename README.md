@@ -1,37 +1,37 @@
 # AI CV Analyzer & Job Recommendation Platform
 
-A university project that will help candidates turn a PDF CV into a structured profile and receive ranked, explainable job recommendations. This repository currently provides the agreed architecture, API and data-model proposals, collaboration rules, and local MongoDB infrastructure. The Spring Boot, FastAPI, and Angular applications are **planned and not yet implemented**.
+A local-first university project that turns PDF/DOCX CVs into structured profiles and returns ranked, explainable IT job recommendations. Spring Boot, MongoDB, CV parsing, FastAPI matching, MiniLM embeddings, caching, and automated tests are implemented. The Angular frontend remains to be generated.
 
-## Planned workflow
+## Implemented workflow
 
-1. Import jobs from Arbeitnow, France Travail, and Adzuna.
+1. Import jobs from Arbeitnow, Adzuna, and La bonne alternance when guarded ingestion is deliberately enabled.
 2. Normalize, deduplicate, and store jobs in MongoDB.
-3. Extract requirements and generate Sentence-BERT job embeddings.
-4. Accept a candidate's PDF CV and extract its text with PyMuPDF.
+3. Clean descriptions and extract evidence-backed technical requirements offline.
+4. Accept PDF/DOCX CVs and extract layout-aware text with PDFBox/Apache POI.
 5. Build a structured candidate profile and CV embedding.
-6. retrieve similar jobs with MongoDB Atlas Vector Search.
+6. Reuse bounded in-memory job embeddings and compute multilingual cosine similarity.
 7. Combine semantic similarity with explicit requirement matching.
-8. Return ranked results and analysis progress to the Angular client.
+8. Return ranked, explainable results synchronously through Spring Boot.
 
 RAG-generated explanations are a possible later extension, not part of V1.
 
-## Technology plan
+## Technology
 
-- Angular frontend
+- Angular frontend (not generated yet)
 - Java and Spring Boot REST backend
-- Python, FastAPI, PyMuPDF, NLP, and Sentence-Transformers AI service
-- MongoDB as the primary database; Atlas Vector Search for V1 similarity search
+- Python 3.12, FastAPI, NumPy, NLP, and Sentence-Transformers AI service
+- MongoDB as the primary job database; process-local job-vector cache for current scale
 - Docker Compose for local MongoDB
-- Server-Sent Events (SSE) for one-way analysis progress updates
+- Synchronous REST for the implemented MVP
 
 ## Architecture
 
 ```text
-Angular client
-  | REST + SSE
-Spring Boot API ---- MongoDB / Atlas Vector Search
+Angular client (next implementation)
+  | REST
+Spring Boot API ---- MongoDB
   | internal HTTP
-FastAPI AI service (CV parsing, profile extraction, embeddings)
+FastAPI AI service (embeddings, cached ranking)
   |
 External job APIs (Arbeitnow, France Travail, Adzuna)
 ```
@@ -41,13 +41,13 @@ See [docs/architecture.md](docs/architecture.md), the proposed [API contract](do
 ## Repository layout
 
 ```text
-backend/       Spring Boot service (planned)
-ai-service/    FastAPI and NLP service (planned)
-frontend/      Angular application (planned)
+backend/       Spring Boot API, CV parser, MongoDB, ingestion and orchestration
+ai-service/    FastAPI embeddings, caching and hybrid ranking
+frontend/      Angular placeholder; implementation has not started
 database/      MongoDB setup notes and future scripts
 docs/          Architecture, API, schema, setup, and workflow documentation
 docs/team/     Individual development guides
-tests/         Cross-service fixtures and integration/E2E tests (planned)
+tests/         Cross-service notes; service tests live beside each implementation
 .github/       Pull request template and future CI workflows
 ```
 
@@ -70,7 +70,8 @@ Read [docs/git-workflow.md](docs/git-workflow.md) before contributing.
 
 - Git
 - Docker Desktop with Docker Compose
-- Later, when applications exist: Java 21, Maven (or wrapper), Python 3.11+, Node.js LTS, and Angular CLI through the project toolchain
+- Java 21, Maven wrapper, Python 3.12 and the existing AI virtual environment
+- Node.js LTS and Angular tooling when frontend implementation begins
 
 Copy `.env.example` to `.env`, keeping all real credentials local. Start the currently defined MongoDB service with:
 
@@ -78,19 +79,21 @@ Copy `.env.example` to `.env`, keeping all real credentials local. Start the cur
 docker compose up -d mongodb
 ```
 
-Once implemented, the intended startup sequence will be MongoDB, FastAPI, Spring Boot, then Angular. Exact commands will be added to each service README; the application services cannot be run yet.
+Follow [backend/README.md](backend/README.md) and [ai-service/README.md](ai-service/README.md). Start MongoDB, FastAPI, Spring Boot, then Angular once it exists.
 
 ## Current status
 
-**Implemented:** repository skeleton, collaboration documentation, proposed OpenAPI contract, proposed MongoDB schema, environment template, and a local MongoDB Compose definition.
+**Implemented:** guarded multi-provider ingestion, deterministic classification/enrichment, MongoDB job APIs, PDF/DOCX parser v1.3, explainable MiniLM recommendation engine, bounded job-vector cache, error contracts, Postman collection, and automated tests.
 
-**Not implemented:** application source code, external API ingestion, parsing, embeddings, vector search, matching, authentication, UI, automated CI, and production deployment.
+**Not implemented:** Angular UI, authentication/authorization, production CORS, persisted CV/recommendation history, OCR, automated CI, or production deployment.
 
 ## Next milestones
 
-1. Both developers review and approve the API and data-model proposals.
-2. Person 1 scaffolds Spring Boot, MongoDB migrations/index setup, and the Arbeitnow ingestion slice.
-3. Person 2 scaffolds Angular and builds the upload/recommendation flow against mocks.
-4. Person 1 scaffolds FastAPI and implements PDF extraction plus profile parsing.
-5. Integrate upload, SSE progress, recommendation retrieval, and cross-service tests.
+1. Freeze the actual synchronous OpenAPI contract and Angular proxy/CORS decision.
+2. Person 2 scaffolds Angular using [the frontend handoff](docs/person2-frontend-handoff.md).
+3. Add a privacy-safe single-upload analysis workflow so parsed profiles can be reused.
+4. Add authentication/ownership before durable CV persistence.
+5. Build a human-labelled relevance evaluation before further score tuning.
+
+See [backend progress](docs/backend-progress-report.md), [optimization results](docs/milestone-3b3-optimization-report.md), and [backend next steps](docs/backend-next-steps.md).
 

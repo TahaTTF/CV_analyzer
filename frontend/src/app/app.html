@@ -1,0 +1,34 @@
+<header class="site-header">
+  <div class="container bar">
+    <a class="brand" routerLink="/" (click)="closeMenu()">
+      <span class="logo" aria-hidden="true"></span>
+      <span>CV Analyzer</span>
+    </a>
+
+    <nav class="nav" [class.open]="menuOpen()" aria-label="Main navigation">
+      @for (l of links; track l.path) {
+        <a [routerLink]="l.path"
+           routerLinkActive="active"
+           [routerLinkActiveOptions]="{ exact: l.exact }"
+           (click)="closeMenu()">{{ l.label }}</a>
+      }
+    </nav>
+
+    <a class="btn btn-primary cta" routerLink="/cv">Get started</a>
+
+    <button class="burger" type="button" (click)="toggleMenu()"
+            [attr.aria-expanded]="menuOpen()" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main>
+  <router-outlet />
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>CV Analyzer · University project. Scores are ranking signals, not hiring probabilities.</p>
+  </div>
+</footer>

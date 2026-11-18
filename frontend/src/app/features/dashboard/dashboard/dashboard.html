@@ -1,0 +1,68 @@
+<section class="hero container">
+  <div class="glow" aria-hidden="true"></div>
+
+  <span class="badge"
+        [class.badge-success]="backend() === 'up'"
+        [class.badge-warning]="backend() === 'down'">
+    <span class="dot"></span>
+    @switch (backend()) {
+      @case ('up') { Backend online }
+      @case ('down') { Backend unreachable }
+      @default { Checking backend… }
+    }
+  </span>
+
+  <h1 class="display">
+    Discover IT opportunities<br />
+    <span class="gradient-text">matched to your skills</span>
+  </h1>
+
+  <p class="lead">
+    Upload your CV and get ranked job recommendations with transparent scores,
+    matched skills and clear explanations. No account needed.
+  </p>
+
+  <div class="actions">
+    <a class="btn btn-primary" routerLink="/cv">Upload your CV</a>
+    <a class="btn btn-ghost" routerLink="/jobs">Browse jobs</a>
+  </div>
+</section>
+
+<section class="container steps" aria-labelledby="how-title">
+  <h2 id="how-title" class="section-title">How it works</h2>
+  <div class="grid">
+    @for (s of steps; track s.n) {
+      <article class="glass-card hoverable">
+        <span class="step-n">{{ s.n }}</span>
+        <h3>{{ s.title }}</h3>
+        <p>{{ s.text }}</p>
+      </article>
+    }
+  </div>
+</section>
+
+<section class="container cards" aria-label="Quick access">
+  <div class="grid">
+    <a class="glass-card hoverable" routerLink="/cv">
+      <h3>CV analysis</h3>
+      <p>Parse your CV and review what was detected.</p>
+    </a>
+
+    @if (hasCv()) {
+      <a class="glass-card hoverable" routerLink="/recommendations">
+        <h3>Recommendations</h3>
+        <p>See the jobs ranked for your CV.</p>
+      </a>
+    } @else {
+      <div class="glass-card disabled" aria-disabled="true">
+        <h3>Recommendations</h3>
+        <p>Upload a CV first to unlock personalized matches.</p>
+      </div>
+    }
+
+    <a class="glass-card hoverable" routerLink="/jobs">
+      <h3>Job search</h3>
+      <p>Search IT jobs by keyword, location and source.</p>
+    </a>
+  </div>
+</section>
