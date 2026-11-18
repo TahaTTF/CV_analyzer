@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnDestroy, inject, signal, viewChild } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { CvApiService } from '../../../core/services/cv-api.service';
 import { ErrorPanel } from '../../../shared/components/error-panel/error-panel';
@@ -26,7 +26,8 @@ export class CvUpload implements OnDestroy {
   readonly apiError = signal<ApiError | null>(null);
   readonly uploading = signal(false);
   readonly dragOver = signal(false);
-
+  readonly sessionExpired =
+    inject(ActivatedRoute).snapshot.queryParamMap.get('session') === 'expired';
   openPicker(): void {
     if (!this.uploading()) this.fileInput().nativeElement.click();
   }

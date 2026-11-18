@@ -1,0 +1,114 @@
+@if (result(); as r) {
+  <section class="container page">
+    <header class="head">
+      <span class="badge">Step 2 of 3</span>
+      <h1>Review your <span class="gradient-text">profile</span></h1>
+      <p>
+        This is what the parser found in <strong class="file">{{ fileName() }}</strong>.
+        Nothing is guessed: anything it could not read reliably is marked
+        <em>Not detected</em>. Edits are not supported yet.
+      </p>
+    </header>
+
+    @if (warnings().length) {
+      <div class="glass-card warnings" role="status">
+        <h2>Parser notes</h2>
+        <ul>
+          @for (w of warnings(); track $index) {
+            <li><span class="badge badge-warning">Note</span> {{ w }}</li>
+          }
+        </ul>
+      </div>
+    }
+
+    <div class="glass-card">
+      <h2>Overview</h2>
+      <dl class="facts">
+        <div>
+          <dt>Target role</dt>
+          <dd>
+            @if (r.profile.targetRole) { {{ r.profile.targetRole }} }
+            @else { <span class="nd">Not detected</span> }
+          </dd>
+        </div>
+        <div>
+          <dt>Years of experience</dt>
+          <dd>
+            @if (r.profile.yearsOfExperience !== null) { {{ r.profile.yearsOfExperience }} }
+            @else { <span class="nd">Not detected</span> }
+          </dd>
+        </div>
+        <div>
+          <dt>Languages</dt>
+          <dd><app-skill-chips [skills]="r.profile.languages" label="Languages" /></dd>
+        </div>
+      </dl>
+
+      <h3>Professional summary</h3>
+      @if (r.profile.professionalSummary) {
+        <p class="text">{{ r.profile.professionalSummary }}</p>
+      } @else {
+        <p class="nd">Not detected</p>
+      }
+    </div>
+
+    <div class="glass-card">
+      <h2>Technical skills</h2>
+      <app-skill-chips [skills]="r.profile.technicalSkills" label="Technical skills" />
+    </div>
+
+    <div class="glass-card">
+      <h2>Experience</h2>
+      @for (e of r.profile.experience; track $index) {
+        <article class="entry">
+          <h3>{{ e.role ?? 'Role not detected' }}</h3>
+          <p class="sub">
+            {{ e.organization ?? 'Organization not detected' }}
+            @if (e.period) { · {{ e.period }} }
+          </p>
+          @if (e.description) { <p class="text">{{ e.description }}</p> }
+        </article>
+      } @empty {
+        <p class="nd">Not detected</p>
+      }
+    </div>
+
+    <div class="glass-card">
+      <h2>Education</h2>
+      @for (e of r.profile.education; track $index) {
+        <article class="entry">
+          <h3>{{ e.qualification ?? 'Qualification not detected' }}</h3>
+          <p class="sub">
+            {{ e.institution ?? 'Institution not detected' }}
+            @if (e.period) { · {{ e.period }} }
+          </p>
+          @if (e.description) { <p class="text">{{ e.description }}</p> }
+        </article>
+      } @empty {
+        <p class="nd">Not detected</p>
+      }
+    </div>
+
+    <div class="glass-card">
+      <h2>Projects</h2>
+      @for (p of r.profile.projects; track $index) {
+        <article class="entry">
+          <h3>{{ p.name ?? 'Project name not detected' }}</h3>
+          @if (p.description) { <p class="text">{{ p.description }}</p> }
+          @if (p.technologies.length) {
+            <app-skill-chips [skills]="p.technologies" label="Technologies" />
+          }
+        </article>
+      } @empty {
+        <p class="nd">Not detected</p>
+      }
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-ghost" type="button" (click)="chooseAnother()">Choose another CV</button>
+      <a class="btn btn-primary" routerLink="/recommendations">Find matching jobs</a>
+    </div>
+
+    <p class="meta">Parser version {{ r.parserVersion }}</p>
+  </section>
+}

@@ -4,7 +4,11 @@
     <h1>Upload your <span class="gradient-text">CV</span></h1>
     <p>We read a PDF or DOCX with selectable text (max 5 MB) and extract your profile.</p>
   </header>
-
+  @if (sessionExpired) {
+    <p class="notice" role="status">
+      Your CV is no longer in memory (the page was refreshed). Please upload it again.
+    </p>
+  }
   <input #fileInput type="file" hidden
          accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
          (change)="onPick($event)" />
