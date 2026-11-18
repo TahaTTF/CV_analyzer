@@ -15,6 +15,7 @@ function toApiError(err: unknown, path: string): ApiError {
         message: 'Cannot reach the server. Check that the backend is running.',
       };
     }
+
     const body = err.error;
     if (body && typeof body === 'object' && typeof body.code === 'string') {
       return {
@@ -27,9 +28,15 @@ function toApiError(err: unknown, path: string): ApiError {
         traceId: body.traceId ?? null,
       };
     }
+
+    // No problem+json body: a gateway/proxy error, usually meaning the backend is down.
+    const gateway = [500, 502, 503, 504].includes(err.status);
     return {
-      timestamp, status: err.status, code: `HTTP_${err.status}`, path, fieldErrors: [], traceId: null,
-      message: 'Unexpected server response.',
+      timestamp, status: err.status, path, fieldErrors: [], traceId: null,
+      code: gateway ? 'NETWORK_UNAVAILABLE' : `HTTP_${err.status}`,
+      message: gateway
+        ? 'Cannot reach the server. Check that the backend is running.'
+        : 'Unexpected server response.',
     };
   }
 

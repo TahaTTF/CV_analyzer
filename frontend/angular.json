@@ -59,20 +59,20 @@
           "defaultConfiguration": "production"
         },
         "serve": {
-          "builder": "@angular/build:dev-server",
-          "configurations": {
-            "production": {
-              "buildTarget": "frontend-tmp:build:production"
-            },
-            "development": {
-              "buildTarget": "frontend-tmp:build:development"
-            }
-          },
-          "defaultConfiguration": "development"
-        },
-        "test": {
-          "builder": "@angular/build:unit-test"
-        }
+  "builder": "@angular/build:dev-server",
+  "options": {
+    "proxyConfig": "proxy.conf.json"
+  },
+  "configurations": {
+    "production": {
+      "buildTarget": "frontend-tmp:build:production"
+    },
+    "development": {
+      "buildTarget": "frontend-tmp:build:development"
+    }
+  },
+  "defaultConfiguration": "development"
+}
       }
     }
   }

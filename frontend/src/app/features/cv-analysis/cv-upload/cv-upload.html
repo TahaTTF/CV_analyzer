@@ -1,0 +1,71 @@
+<section class="container page">
+  <header class="head">
+    <span class="badge">Step 1 of 3</span>
+    <h1>Upload your <span class="gradient-text">CV</span></h1>
+    <p>We read a PDF or DOCX with selectable text (max 5 MB) and extract your profile.</p>
+  </header>
+
+  <input #fileInput type="file" hidden
+         accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+         (change)="onPick($event)" />
+
+  <div class="dropzone"
+       role="button" tabindex="0"
+       [class.over]="dragOver()"
+       [class.busy]="uploading()"
+       [attr.aria-disabled]="uploading()"
+       aria-label="Choose a CV file or drop it here"
+       (click)="openPicker()"
+       (keydown.enter)="openPicker()"
+       (keydown.space)="openPicker(); $event.preventDefault()"
+       (dragover)="onDragOver($event)"
+       (dragleave)="onDragLeave()"
+       (drop)="onDrop($event)">
+    <div class="icon" aria-hidden="true">↑</div>
+    <h2>Drag and drop your CV here</h2>
+    <p>or <span class="link">browse files</span></p>
+    <p class="hint">PDF or DOCX · up to 5 MB · text-based files only</p>
+  </div>
+
+  @if (localError(); as msg) {
+    <p class="local-error" role="alert">{{ msg }}</p>
+  }
+
+  @if (file(); as f) {
+    <div class="glass-card file-card">
+      <div class="meta">
+        <span class="kind">{{ fileKind(f) }}</span>
+        <div>
+          <strong class="name">{{ f.name }}</strong>
+          <span class="size">{{ formatSize(f.size) }}</span>
+        </div>
+      </div>
+      @if (!uploading()) {
+        <button class="btn btn-ghost" type="button" (click)="remove()">Remove</button>
+      }
+    </div>
+
+    @if (uploading()) {
+      <div class="progress" role="progressbar" aria-label="Analyzing your CV" aria-busy="true">
+        <div class="bar"></div>
+      </div>
+      <p class="status">Analyzing your CV…</p>
+    }
+
+    <div class="actions">
+      @if (uploading()) {
+        <button class="btn btn-ghost" type="button" (click)="cancel()">Cancel</button>
+      } @else {
+        <button class="btn btn-primary" type="button" (click)="submit()">Analyze my CV</button>
+      }
+    </div>
+  }
+
+  @if (apiError(); as err) {
+    <app-error-panel [error]="err" [retryable]="!!file()" (retry)="submit()" />
+  }
+
+  <p class="privacy">
+    Your CV is processed in memory and is not stored. Refreshing the page clears it.
+  </p>
+</section>

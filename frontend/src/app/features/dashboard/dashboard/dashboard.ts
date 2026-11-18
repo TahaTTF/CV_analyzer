@@ -26,8 +26,7 @@ export class Dashboard {
   constructor() {
     inject(HealthApiService).check().subscribe({
       next: (r: unknown) => this.backend.set(
-        typeof r === 'object' && r !== null && 'status' in r &&
-        (r as { status?: unknown }).status === 'UP'
+        typeof r === 'object' && r !== null && 'status' in r && r.status === 'UP'
           ? 'up'
           : 'down'
       ),

@@ -9,5 +9,9 @@ export const routes: Routes = [
       import('./features/dashboard/dashboard/dashboard').then((m) => m.Dashboard),
   },
   // The other pages (/cv, /cv/review, /recommendations, /jobs, /jobs/:jobId) are added in the next steps.
-  { path: '**', redirectTo: '' },
+  { path: 'cv',
+    title: 'Upload your CV · CV Analyzer',
+    loadComponent: () =>
+      import('./features/cv-analysis/cv-upload/cv-upload').then((m) => m.CvUpload),
+  }, { path: '**', redirectTo: '' },
 ];
