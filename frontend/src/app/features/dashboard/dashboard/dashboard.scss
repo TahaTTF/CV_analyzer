@@ -1,0 +1,31 @@
+:host { display: block; }
+
+.hero {
+  position: relative;
+  text-align: center;
+  padding: 96px 0 72px;
+  display: flex; flex-direction: column; align-items: center; gap: 24px;
+}
+
+.glow {
+  position: absolute; z-index: -1; top: -40px; left: 50%;
+  width: 720px; height: 480px; transform: translateX(-50%);
+  background: radial-gradient(closest-side, rgba(99, 102, 241, 0.35), transparent 70%);
+  pointer-events: none;
+}
+
+.lead { max-width: 560px; font-size: 17px; color: var(--text-2); }
+.actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+
+.dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+
+.section-title { margin-bottom: 20px; }
+.steps { padding-bottom: 48px; }
+.cards { padding-bottom: 96px; }
+
+.grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+
+.glass-card h3 { font-size: 18px; margin-bottom: 8px; }
+.step-n { display: inline-block; font-size: 12px; letter-spacing: .1em; color: var(--blue-2); margin-bottom: 12px; }
+.glass-card.disabled { opacity: .55; }
+a.glass-card { display: block; }
