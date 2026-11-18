@@ -1,0 +1,64 @@
+@let r = rec();
+<article class="glass-card hoverable card">
+  <header class="top">
+    <span class="rank" [attr.aria-label]="'Rank ' + rank()">#{{ rank() }}</span>
+    <div class="title">
+      <h3>{{ r.jobTitle }}</h3>
+      <p class="sub">
+        {{ r.company ?? 'Company not specified' }}
+        @if (r.location) { · {{ r.location }} }
+        @if (r.source) { · <span class="src">{{ r.source }}</span> }
+      </p>
+    </div>
+    <div class="score">
+      <strong>{{ score() }}</strong><span>/100</span>
+    </div>
+  </header>
+
+  <app-score-meter [value]="r.matchScore" label="Overall match score" />
+
+  <div class="skills">
+    <div>
+      <h4>Matched skills</h4>
+      <app-skill-chips [skills]="r.matchedSkills" variant="matched"
+                       label="Matched skills" emptyText="None identified" />
+    </div>
+    <div>
+      <h4>Not identified in your CV</h4>
+      <app-skill-chips [skills]="r.missingSkills" variant="missing"
+                       label="Skills not identified in your CV" emptyText="None" />
+    </div>
+  </div>
+
+  <p class="explanation">{{ r.explanation }}</p>
+
+  <details class="breakdown">
+    <summary>Score breakdown</summary>
+    <div class="rows">
+      <div class="row">
+        <span>Semantic</span>
+        <app-score-meter [value]="r.semanticScore" label="Semantic score" />
+        <b>{{ round(r.semanticScore) }}</b>
+      </div>
+      <div class="row">
+        <span>Skills</span>
+        <app-score-meter [value]="r.skillScore" label="Skill score" />
+        <b>{{ round(r.skillScore) }}</b>
+      </div>
+      <div class="row">
+        <span>Role</span>
+        <app-score-meter [value]="r.roleScore" label="Role score" />
+        <b>{{ round(r.roleScore) }}</b>
+      </div>
+    </div>
+  </details>
+
+  <div class="actions">
+    <a class="btn btn-ghost" [routerLink]="['/jobs', r.jobId]">View details</a>
+    @if (applyUrl(); as url) {
+      <a class="btn btn-primary" [href]="url" target="_blank" rel="noopener noreferrer">
+        Apply on provider site
+      </a>
+    }
+  </div>
+</article>

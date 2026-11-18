@@ -1,0 +1,31 @@
+:host { display: block; }
+
+.card { display: flex; flex-direction: column; gap: 16px; }
+
+.top { display: flex; align-items: flex-start; gap: 16px; }
+.rank {
+  flex: none; width: 44px; height: 44px; display: grid; place-items: center;
+  border-radius: 12px; font-weight: 600; color: #c7d2fe;
+  background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.35);
+}
+.title { flex: 1; min-width: 0; }
+.title h3 { font-size: 18px; margin: 0 0 4px; }
+.sub { color: var(--text-2); font-size: 14px; }
+.src { font-size: 12px; letter-spacing: .06em; color: var(--text-muted); }
+
+.score { flex: none; text-align: right; }
+.score strong { font-size: 28px; color: var(--text); }
+.score span { color: var(--text-muted); }
+
+.skills { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.skills h4 { margin: 0 0 8px; font-size: 12px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); }
+
+.explanation { color: var(--text-2); }
+
+.breakdown { border-top: 1px solid var(--border); padding-top: 12px; }
+.breakdown summary { cursor: pointer; color: var(--blue-2); }
+.rows { display: grid; gap: 12px; margin-top: 12px; }
+.row { display: grid; grid-template-columns: 90px 1fr 40px; align-items: center; gap: 12px; }
+.row b { text-align: right; color: var(--text); }
+
+.actions { display: flex; gap: 12px; flex-wrap: wrap; }
