@@ -1,0 +1,27 @@
+:host { display: block; }
+
+.page { max-width: 900px; padding: 64px 0 96px; display: flex; flex-direction: column; gap: 20px; }
+
+.head { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 8px; }
+
+.filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px; padding: 20px; }
+.field { display: flex; flex-direction: column; gap: 6px; flex: 1 1 180px; }
+.field label { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); }
+.field input, .field select {
+  padding: 10px 12px; border-radius: 10px; font: inherit; color: var(--text);
+  background: var(--surface-solid); border: 1px solid var(--border);
+}
+.field input:focus-visible, .field select:focus-visible { outline: 2px solid var(--blue-2); outline-offset: 2px; }
+
+.state, .count { text-align: center; color: var(--text-muted); }
+
+.list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+a.job { display: flex; flex-direction: column; gap: 10px; }
+.row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.row h2 { font-size: 18px; }
+.src { flex: none; font-size: 12px; letter-spacing: .06em; color: var(--text-muted); }
+.sub { color: var(--text-2); font-size: 14px; }
+
+.empty { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+
+.pager { display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 8px; }

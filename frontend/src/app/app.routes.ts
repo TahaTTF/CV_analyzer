@@ -41,6 +41,17 @@ export const routes: Routes = [
         (m) => m.RecommendationPage,
       ),
   },
-  // /jobs and /jobs/:jobId are added in the next step.
+   {
+    path: 'jobs',
+    title: 'Jobs · CV Analyzer',
+    loadComponent: () =>
+      import('./features/jobs/job-search-page/job-search-page').then((m) => m.JobSearchPage),
+  },
+  {
+    path: 'jobs/:jobId',
+    title: 'Job details · CV Analyzer',
+    loadComponent: () =>
+      import('./features/jobs/job-details-page/job-details-page').then((m) => m.JobDetailsPage),
+  },
   { path: '**', redirectTo: '' },
 ];

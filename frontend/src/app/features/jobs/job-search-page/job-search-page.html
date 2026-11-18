@@ -1,0 +1,85 @@
+<section class="container page">
+  <header class="head">
+    <h1>Browse <span class="gradient-text">IT jobs</span></h1>
+    <p>Search the jobs stored in the platform. No CV needed.</p>
+  </header>
+
+  <div class="glass-card filters" role="search">
+    <div class="field">
+      <label for="q">Keyword</label>
+      <input id="q" type="search" maxlength="200" placeholder="e.g. data engineer"
+             [formControl]="queryCtrl" />
+    </div>
+    <div class="field">
+      <label for="loc">Location</label>
+      <input id="loc" type="search" maxlength="120" placeholder="e.g. Berlin"
+             [formControl]="locationCtrl" />
+    </div>
+    <div class="field">
+      <label for="src">Source</label>
+      <select id="src" [formControl]="sourceCtrl">
+        <option value="">All sources</option>
+        @for (s of sources; track s) {
+          <option [value]="s">{{ sourceLabel(s) }}</option>
+        }
+      </select>
+    </div>
+    <button class="btn btn-ghost" type="button" (click)="reset()">Reset</button>
+  </div>
+
+  @switch (status()) {
+    @case ('loading') {
+      <p class="state" role="status" aria-busy="true">Loading jobs…</p>
+    }
+
+    @case ('error') {
+      @if (error(); as err) {
+        <app-error-panel [error]="err" [retryable]="true" (retry)="retry()" />
+      }
+    }
+
+    @case ('success') {
+      @if (result(); as r) {
+        @if (r.items.length === 0) {
+          <div class="glass-card empty">
+            <h2>No jobs found</h2>
+            <p>Try fewer filters or a different keyword.</p>
+            <button class="btn btn-ghost" type="button" (click)="reset()">Clear filters</button>
+          </div>
+        } @else {
+          <p class="count">{{ r.totalElements }} job{{ r.totalElements === 1 ? '' : 's' }}</p>
+
+          <ul class="list">
+            @for (job of r.items; track job.id) {
+              <li>
+                <a class="glass-card hoverable job" [routerLink]="['/jobs', job.id]">
+                  <div class="row">
+                    <h2>{{ job.title }}</h2>
+                    <span class="src">{{ sourceLabel(job.source) }}</span>
+                  </div>
+                  <p class="sub">
+                    {{ job.company ?? 'Company not specified' }}
+                    @if (job.location) { · {{ job.location }} }
+                    @if (job.remote) { · <span class="badge badge-success">Remote</span> }
+                  </p>
+                  <app-skill-chips [skills]="job.skills.slice(0, 6)" label="Skills"
+                                   emptyText="No skills listed" />
+                </a>
+              </li>
+            }
+          </ul>
+
+          @if (r.totalPages > 1) {
+            <nav class="pager" aria-label="Pagination">
+              <button class="btn btn-ghost" type="button"
+                      [disabled]="r.page === 0" (click)="goTo(r.page - 1)">Previous</button>
+              <span>Page {{ r.page + 1 }} of {{ r.totalPages }}</span>
+              <button class="btn btn-ghost" type="button"
+                      [disabled]="r.page + 1 >= r.totalPages" (click)="goTo(r.page + 1)">Next</button>
+            </nav>
+          }
+        }
+      }
+    }
+  }
+</section>

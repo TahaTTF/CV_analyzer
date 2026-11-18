@@ -1,0 +1,73 @@
+<section class="container page">
+  <button class="btn btn-ghost back" type="button" (click)="back()">← Back to results</button>
+
+  @switch (status()) {
+    @case ('loading') {
+      <p class="state" role="status" aria-busy="true">Loading job…</p>
+    }
+
+    @case ('error') {
+      @if (error(); as err) {
+        <app-error-panel [error]="err" [retryable]="err.code !== 'RESOURCE_NOT_FOUND'" (retry)="retry()" />
+      }
+    }
+
+    @case ('success') {
+      @if (job(); as j) {
+        <header class="head">
+          <span class="badge">{{ sourceLabel(j.source) }}</span>
+          <h1>{{ j.title }}</h1>
+          <p class="sub">
+            {{ j.company ?? 'Company not specified' }}
+            @if (j.location) { · {{ j.location }} }
+          </p>
+          <div class="meta">
+            @if (workMode()) { <span class="badge badge-success">{{ workMode() }}</span> }
+            @if (j.publishedAt) { <span class="badge">Published {{ j.publishedAt | date: 'mediumDate' }}</span> }
+          </div>
+        </header>
+
+        @if (applyUrl(); as url) {
+          <div class="actions">
+            <a class="btn btn-primary" [href]="url" target="_blank" rel="noopener noreferrer">
+              Apply on provider site
+            </a>
+          </div>
+        } @else {
+          <p class="note">No valid application link is available for this job.</p>
+        }
+
+        @if (employmentTypes().length) {
+          <div class="glass-card">
+            <h2>Employment type</h2>
+            <app-skill-chips [skills]="employmentTypes()" label="Employment types" />
+          </div>
+        }
+
+        <div class="glass-card">
+          <h2>Skills</h2>
+          <h3>Required or mentioned</h3>
+          <app-skill-chips [skills]="requiredSkills()" label="Required skills"
+                           emptyText="No skills extracted" />
+          @if (learnedSkills().length) {
+            <h3>To be learned on the job</h3>
+            <app-skill-chips [skills]="learnedSkills()" label="Skills to be acquired" />
+          }
+        </div>
+
+        <div class="glass-card">
+          <h2>Description</h2>
+          @if (description()) {
+            <p class="description">{{ description() }}</p>
+          } @else {
+            <p class="note">No description available.</p>
+          }
+        </div>
+
+        @if (j.relevanceReason) {
+          <p class="note">Listed as IT-relevant: {{ j.relevanceReason }}</p>
+        }
+      }
+    }
+  }
+</section>
