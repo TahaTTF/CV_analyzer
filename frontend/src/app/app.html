@@ -28,7 +28,47 @@
 </main>
 
 <footer class="site-footer">
-  <div class="container">
-    <p>CV Analyzer · University project. Scores are ranking signals, not hiring probabilities.</p>
+  <div class="container columns">
+    <div class="col about">
+      <a class="brand" routerLink="/">
+        <span class="logo" aria-hidden="true"></span>
+        <span>CV Analyzer</span>
+      </a>
+      <p>
+        Upload your CV and discover IT jobs ranked by how well they match your skills,
+        with transparent, explainable scores.
+      </p>
+    </div>
+
+    <nav class="col" aria-label="Footer navigation">
+      <h2>Explore</h2>
+      <ul>
+        @for (l of links; track l.path) {
+          <li><a [routerLink]="l.path">{{ l.label }}</a></li>
+        }
+      </ul>
+    </nav>
+
+    <div class="col">
+      <h2>Project</h2>
+      <ul>
+        <li><a [href]="repoUrl" target="_blank" rel="noopener noreferrer">Source code on GitHub</a></li>
+        <li>University project · NoSQL &amp; web services</li>
+        <li>Angular · Spring Boot · FastAPI · MongoDB</li>
+      </ul>
+    </div>
+
+    <div class="col">
+      <h2>Privacy</h2>
+      <p>Your CV is processed in memory and is never stored. Refreshing the page clears it.</p>
+    </div>
+  </div>
+
+  <div class="container bottom">
+    <p>
+      © {{ year }} CV Analyzer · Frontend by {{ team.frontend }} ·
+      Backend &amp; AI by {{ team.backend }}
+    </p>
+    <p>Match scores are ranking signals, not hiring probabilities.</p>
   </div>
 </footer>

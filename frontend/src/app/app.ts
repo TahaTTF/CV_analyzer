@@ -10,6 +10,11 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 export class App {
   readonly menuOpen = signal(false);
 
+  readonly year = new Date().getFullYear();
+  readonly repoUrl = 'https://github.com/TahaTTF/CV_analyzer';
+  // Edit these names freely (for example add Taha's full name).
+  readonly team = { frontend: 'Nour Lachaal', backend: 'Taha' };
+
   readonly links = [
     { path: '/', label: 'Home', exact: true },
     { path: '/cv', label: 'Upload CV', exact: false },
